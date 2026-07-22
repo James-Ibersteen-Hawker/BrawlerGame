@@ -1,5 +1,7 @@
 "use strict";
 import KDTree from "https://cdn.jsdelivr.net/gh/James-Ibersteen-Hawker/KDTree@v3.0.0/kdtree.js"
+const canvas = document.querySelector("#gamearea");
+const ctx = canvas.getContext("2d");
 function colorGenerator() {
     const colors = [];
     const [r, g, b] = [[], [], []]
@@ -15,8 +17,14 @@ function colorGenerator() {
     }
     return colors;
 }
-
 const colorset = colorGenerator();
+for (let i = 0; i < colorset.length; i++) {
+    const x = i % 42;
+    const y = Math.floor(i / 42);
+
+    ctx.fillStyle = `rgb(${colorset[i].join(",")})`;
+    ctx.fillRect(x, y, 1, 1);
+}
 const colortree = await KDTree.initFrom(colorset);
 const result = colortree.search([255,255,255], {includeDistance: true});
 console.log(result)
