@@ -28,3 +28,22 @@ for (let i = 0; i < colorset.length; i++) {
 const colortree = await KDTree.initFrom(colorset);
 const result = colortree.search([255,255,255], {includeDistance: true});
 console.log(result)
+
+//clock function
+let GAME_ON = false;
+let PAUSE_GAME = false;
+let UNPAUSE_GAME = () => {};
+const GAME_SPEED = 100; //ms between iterations
+async function RUN() {
+    while (GAME_ON) {
+        await new Promise((resolve) => {
+            if (PAUSE_GAME === true) UNPAUSE_GAME = resolve;
+            else {
+                UNPAUSE_GAME = () => {};
+                resolve();
+            }
+        })
+        //game running every so often
+        await new Promise((res) => setTimeout(res, GAME_SPEED));
+    }
+}
