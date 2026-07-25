@@ -1,7 +1,11 @@
 "use strict";
 import KDTree from "https://cdn.jsdelivr.net/gh/James-Ibersteen-Hawker/KDTree@v3.0.0/kdtree.js"
+const colors = await (await fetch("./colors.json")).json();
+const hierarchy = await (await fetch("./hierarchy.json")).json();
+const directory = await (await fetch("./directory.json")).json();
 const canvas = document.querySelector("#gamearea");
 const ctx = canvas.getContext("2d");
+const ColorTree = await KDTree.initFrom(colors);
 class Game {
     #on = false;
     #paused = false;
