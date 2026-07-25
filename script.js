@@ -17,17 +17,19 @@ function colorGenerator() {
     }
     return colors;
 }
-const colorset = colorGenerator();
+const colorset = colorGenerator().map(e => {
+    return e.map(n => n.toString(16).padStart(2,0)).join("");
+});
+console.log(colorset)
 for (let i = 0; i < colorset.length; i++) {
     const x = i % 42;
     const y = Math.floor(i / 42);
 
-    ctx.fillStyle = `rgb(${colorset[i].join(",")})`;
+    ctx.fillStyle = `#${colorset[i]}`;
     ctx.fillRect(x, y, 1, 1);
 }
-const colortree = await KDTree.initFrom(colorset);
-const result = colortree.search([255,255,255], {includeDistance: true});
-console.log(result)
+// const colortree = await KDTree.initFrom(colorset);
+// const result = colortree.search([255,255,255], {includeDistance: true});
 
 class Game {
     #paused = false;
@@ -59,7 +61,6 @@ class Game {
         }
     }
     #gameFunction() {
-        console.log("game!");
     }
     start() {
         if (this.#on) return; // already on
