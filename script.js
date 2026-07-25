@@ -29,21 +29,50 @@ const colortree = await KDTree.initFrom(colorset);
 const result = colortree.search([255,255,255], {includeDistance: true});
 console.log(result)
 
-//clock function
-let GAME_ON = false;
-let PAUSE_GAME = false;
-let UNPAUSE_GAME = () => {};
-const GAME_SPEED = 100; //ms between iterations
-async function RUN() {
-    while (GAME_ON) {
-        await new Promise((resolve) => {
-            if (PAUSE_GAME === true) UNPAUSE_GAME = resolve;
-            else {
-                UNPAUSE_GAME = () => {};
-                resolve();
-            }
-        })
-        //game running every so often
-        await new Promise((res) => setTimeout(res, GAME_SPEED));
+class Game {
+    #paused = false;
+    #speed;
+    #resolver = null;
+    #on = false;
+    constructor(speed) { this.#speed = speed; }
+    set speed(v) { this.#speed = v; }
+    get speed() { return this.#speed; }
+    get isPaused() { return this.#paused }
+    pause() {
+        if (this.#paused) return; //already paused
+        this.#paused = true;
+    }
+    unpause() {
+        if (!this.#paused) return;
+        this.#paused = false;
+        this.#resolver?.();
+        this.#resolver = null;
+    }
+    async #run() {
+        while (this.#on) {
+            //pause statement
+            if (this.#paused) await new Promise(res => this.#resolver = res);
+            if (!this.#on) break;
+            //game loop here
+            this.#gameFunction();
+            await new Promise(res => setTimeout(res, this.#speed));
+        }
+    }
+    #gameFunction() {
+        console.log("game!");
+    }
+    start() {
+        if (this.#on) return; // already on
+        this.#on = true;
+        this.#run().catch(err => {
+            this.#on = false;
+            throw err;
+        });
+    }
+    end() {
+        this.#on = false;
+        this.#paused = false;
+        this.#resolver?.();
+        this.#resolver = null;
     }
 }
