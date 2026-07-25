@@ -1,0 +1,29 @@
+//COLORSET GENERATOR ARCHIVE
+function colorGenerator() {
+    const colors = [];
+    const [r, g, b] = [[], [], []]
+    for (let i = 0; i < 6; i++) r.push(((255 / 5)) * i)
+    for (let i = 0; i < 7; i++) g.push(Math.floor((255 / 6) * i))
+    for (let i = 0; i < 6; i++) b.push((255 / 5) * i)
+    for (let ri = 0; ri < r.length; ri++) {
+        for (let gi = 0; gi < g.length; gi++) {
+            for (let bi = 0; bi < b.length; bi++) {
+                colors.push([r[ri], g[gi], b[bi]])
+            }
+        }
+    }
+    return colors;
+}
+const colorset = colorGenerator().map(e => {
+    return e.map(n => n.toString(16).padStart(2,0)).join("");
+});
+console.log(colorset)
+for (let i = 0; i < colorset.length; i++) {
+    const x = i % 42;
+    const y = Math.floor(i / 42);
+
+    ctx.fillStyle = `#${colorset[i]}`;
+    ctx.fillRect(x, y, 1, 1);
+}
+// const colortree = await KDTree.initFrom(colorset);
+// const result = colortree.search([255,255,255], {includeDistance: true});
