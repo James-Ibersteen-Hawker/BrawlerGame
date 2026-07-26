@@ -1,11 +1,9 @@
 "use strict";
-import KDTree from "https://cdn.jsdelivr.net/gh/James-Ibersteen-Hawker/KDTree@v3.0.0/kdtree.js"
-const colors = await (await fetch("./colors.json")).json();
-const hierarchy = await (await fetch("./hierarchy.json")).json();
-const directory = await (await fetch("./directory.json")).json();
+const hierarchy = await(await fetch("./hierarchy.json")).json();
+const directory = await(await fetch("./directory.json")).json();
 const canvas = document.querySelector("#gamearea");
 const ctx = canvas.getContext("2d");
-const ColorTree = await KDTree.initFrom(colors);
+const Quantizer = new Worker("./quantize.js", { type: "module" });
 class Game {
     #on = false;
     #paused = false;
@@ -53,3 +51,12 @@ class Game {
         this.#resolver = null;
     }
 }
+async function quantize(imgurl) {
+    return new Promise((resolve, reject) => {
+        Quantizer.onmessage = e => resolve(e.data.img);
+        Quantizer.onerror = err => reject(err);
+        Quantizer.postMessage({ imgurl });
+    })
+}
+const result = await quantize("q");
+console.log(result)
