@@ -2,6 +2,7 @@
 import KDTree from "https://cdn.jsdelivr.net/gh/James-Ibersteen-Hawker/KDTree@v3.0.0/kdtree.js";
 const colorsPromise = fetch("./colors.json").then(e => e.json());
 let ColorTree;
+//0,0,0 is alpha, otherwise 1,1,1. If any colored spot goes to 0,0,0, default to 1,1,1
 function quantize(imgurl, colors) {
     console.log(imgurl)
     return imgurl;
