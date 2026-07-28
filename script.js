@@ -58,5 +58,5 @@ async function quantize(imgurl) {
         Quantizer.postMessage({ imgurl });
     })
 }
-const result = await quantize("q");
+const result = await quantize("./testBall.jpg");
 console.log(result)
