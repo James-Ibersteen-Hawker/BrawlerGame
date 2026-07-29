@@ -4,13 +4,8 @@ import initXXHash from "https://unpkg.com/xxhash-wasm@1.1.0/esm/xxhash-wasm.js";
 let xxhash = null;
 const colorsPromise = fetch("./colors.json").then(e => e.json());
 let ColorLUT = new Map();
-let ColorTree;
-let alphaKey;
-//0,0,0 is alpha, otherwise 1,1,1. If any colored spot goes to 0,0,0, default to 1,1,1
-async function getHash() {
-    if (!xxhash) xxhash = await initXXHash();
-    return xxhash;
-}
+let ColorTree, alphaKey;
+async function getHash() { if (!xxhash) xxhash = await initXXHash() }
 async function quantize(imgurl, colors) {
     const blob = await (await fetch(imgurl)).blob();
     if (!blob.type.includes("image")) throw new Error(`${imgurl} is not an Image`);
@@ -18,12 +13,9 @@ async function quantize(imgurl, colors) {
     const CANVAS = new OffscreenCanvas(bitmap.width, bitmap.height);
     const QCTX = CANVAS.getContext("2d");
     QCTX.drawImage(bitmap, 0, 0);
-    const imageData = QCTX.getImageData(0, 0, bitmap.width, bitmap.height);
-    const pixels = imageData.data;
+    const pixels = QCTX.getImageData(0, 0, bitmap.width, bitmap.height).data;
     const result = new Uint8Array((pixels.length / 4) + 2);
-    result[0] = bitmap.width;
-    result[1] = bitmap.height;
-    for (let i = 0, j = 2; i < pixels.length; i += 4, j++) {
+    for (let i = 0, j = 0; i < pixels.length; i += 4, j++) {
         const r = pixels[i];
         const g = pixels[i + 1];
         const b = pixels[i + 2];
@@ -35,8 +27,10 @@ async function quantize(imgurl, colors) {
         if (mapKey === alphaKey) result[j] = ColorLUT.get(xxhash.h32(colors[1]));
         else result[j] = mapKey;
     }
+    const w = bitmap.width;
+    const h = bitmap.height;
     bitmap.close();
-    return result;
+    return [result, w, h];
 }
 self.onmessage = async function (e) {
     await getHash();
@@ -50,5 +44,7 @@ self.onmessage = async function (e) {
         }
     }
     if (!alphaKey) alphaKey = ColorLUT.get(xxhash.h32(colors[0]));
-    self.postMessage({ img: await quantize(e.data.imgurl, colors) })
+    const [result, w, h] = await quantize(e.data.imgurl, colors);
+    const imgBuffer = result.buffer;
+    self.postMessage({ img: imgBuffer, w, h }, [imgBuffer])
 }
