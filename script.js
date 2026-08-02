@@ -5,6 +5,7 @@ const canvas = document.querySelector("#gamearea");
 const ctx = canvas.getContext("2d");
 const Quantizer = new Worker("./quantize.js", { type: "module" });
 const colors = await (await fetch("./colors.json")).json();
+const elements = [];
 class Game {
     #on = false;
     #paused = false;
@@ -59,14 +60,23 @@ async function quantize(imgurl) {
         Quantizer.postMessage({ imgurl });
     })
 }
-const result = await quantize("./testBall.jpg");
-const testImg = new Uint8Array(result.img);
-console.log(result)
-for (let i = 0; i < testImg.length; i++) {
-    const px = testImg[i];
-    const x = i % result.w;
-    const y = Math.floor(i / result.w);
-    ctx.fillStyle = `rgb(${colors[px].join(",")})`;
-    ctx.fillRect(x, y, 1, 1);
+async function loadAssets() {
+    const directory = await (await fetch("./directory.json")).json();
+    for (const item of directory) {
+        const result = await quantize(item?.filepath);
+        result.name = item.name;
+        elements.push(result);
+    };
 }
-console.log("done")
+loadAssets();
+// const result = await quantize("./testBall.jpg");
+// const testImg = new Uint8Array(result.img);
+// console.log(result);
+// for (let i = 0; i < testImg.length; i++) {
+//     const px = testImg[i];
+//     const x = i % result.w;
+//     const y = Math.floor(i / result.w);
+//     ctx.fillStyle = `rgb(${colors[px].join(",")})`;
+//     ctx.fillRect(x, y, 1, 1);
+// }
+// console.log("done")
