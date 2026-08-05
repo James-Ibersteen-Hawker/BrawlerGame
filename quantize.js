@@ -1,11 +1,10 @@
 "use strict";
 import KDTree from "https://cdn.jsdelivr.net/gh/James-Ibersteen-Hawker/KDTree@v3.0.0/kdtree.js";
-import initXXHash from "https://unpkg.com/xxhash-wasm@1.1.0/esm/xxhash-wasm.js";
-let xxhash = null;
-const colorsPromise = fetch("./colors.json").then(e => e.json());
-let ColorLUT = new Map();
+import { getXXhash, getLUT, getColors } from "./helpers.js";
+let xxhash;
+let ColorLUT;
+let colors;
 let ColorTree, alphaKey;
-async function getHash() { if (!xxhash) xxhash = await initXXHash() }
 async function quantize(imgurl, colors) {
     const blob = await (await fetch(imgurl)).blob();
     if (!blob.type.includes("image")) throw new Error(`${imgurl} is not an Image`);
@@ -33,16 +32,10 @@ async function quantize(imgurl, colors) {
     return [result, w, h];
 }
 self.onmessage = async function (e) {
-    await getHash();
-    const colors = await colorsPromise;
+    xxhash = await getXXhash();
+    colors = await getColors();
+    ColorLUT = await getLUT();
     if (!ColorTree) ColorTree = await KDTree.initFrom(colors);
-    if (ColorLUT.size === 0) {
-        for (let i = 0; i < colors.length; i++) {
-            const hashed = xxhash.h32(colors[i])
-            ColorLUT.set(i, hashed);
-            ColorLUT.set(hashed, i);
-        }
-    }
     if (!alphaKey) alphaKey = ColorLUT.get(xxhash.h32(colors[0]));
     const [result, w, h] = await quantize(e.data.imgurl, colors);
     const imgBuffer = result.buffer;
