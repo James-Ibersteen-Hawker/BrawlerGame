@@ -3,16 +3,11 @@ import { getXXhash, getColors, getLUT } from "./helpers.js";
 const hierarchy = await(await fetch("./hierarchy.json")).json();
 const directory = await(await fetch("./directory.json")).json();
 const canvas = document.querySelector("#gamearea");
+canvas.imageSmoothingEnabled = false;
 const ctx = canvas.getContext("2d");
 const Quantizer = new Worker("./quantize.js", { type: "module" });
 const colors = await(await fetch("./colors.json")).json();
 const elements = [];
-// let ColorLUT;
-// for (let i = 0; i < colors.length; i++) {
-//     const hashed = xxhash.h32(colors[i])
-//     ColorLUT.set(i, hashed);
-//     ColorLUT.set(hashed, i);
-// }
 class Game {
     #on = false;
     #paused = false;
@@ -76,16 +71,16 @@ async function loadAssets() {
     };
 }
 // loadAssets();
-const temp = await quantize("./OG TMNT-1.png (6).png");
-console.log(new Uint8Array(temp.img))
-// const result = await quantize("./testBall.jpg");
-// const testImg = new Uint8Array(result.img);
-// console.log(result);
-// for (let i = 0; i < testImg.length; i++) {
-//     const px = testImg[i];
-//     const x = i % result.w;
-//     const y = Math.floor(i / result.w);
-//     ctx.fillStyle = `rgb(${colors[px].join(",")})`;
-//     ctx.fillRect(x, y, 1, 1);
-// }
-// console.log("done")
+const result = await quantize("./OG TMNT-1.png (6).png");
+const testImg = new Uint8Array(result.img);
+console.log(colors);
+console.log(result);
+for (let i = 0; i < testImg.length; i++) {
+    const px = testImg[i];
+    const x = i % result.w;
+    const y = Math.floor(i / result.w);
+    if (px === 0) continue;
+    ctx.fillStyle = `rgb(${colors[px].join(",")})`;
+    ctx.fillRect(x, y, 1, 1);
+}
+console.log("done")

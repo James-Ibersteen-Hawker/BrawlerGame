@@ -6,6 +6,7 @@ let ColorLUT;
 let colors;
 let ColorTree, alphaKey;
 async function quantize(imgurl, colors) {
+    console.log(alphaKey)
     const blob = await (await fetch(imgurl)).blob();
     if (!blob.type.includes("image")) throw new Error(`${imgurl} is not an Image`);
     const bitmap = await createImageBitmap(blob);
@@ -20,11 +21,13 @@ async function quantize(imgurl, colors) {
         const b = pixels[i + 2];
         const a = pixels[i + 3];
         if (a === 0) result[j] = alphaKey;
-        const nearest = ColorTree.search([r, g, b]);
-        const hashed = xxhash.h32(nearest);
-        const mapKey = ColorLUT.get(hashed);
-        if (mapKey === alphaKey) result[j] = ColorLUT.get(xxhash.h32(colors[1]));
-        else result[j] = mapKey;
+        else {
+            const nearest = ColorTree.search([r, g, b]);
+            const hashed = xxhash.h32(nearest);
+            const mapKey = ColorLUT.get(hashed);
+            if (mapKey === alphaKey) result[j] = ColorLUT.get(xxhash.h32(colors[1]));
+            else result[j] = mapKey;
+        }
     }
     const w = bitmap.width;
     const h = bitmap.height;
